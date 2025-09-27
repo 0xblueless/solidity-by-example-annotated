@@ -19,7 +19,7 @@ contract EtherStore {
 
         // Q: Why doesn't msg.sender have to be explicitly marked `payable` here?
         // A: Not sure. I think it has something to do with `call` lacking type safety.
-        (bool sent, ) = msg.sender.call{value: bal}("");
+        (bool sent,) = msg.sender.call{value: bal}("");
         require(sent, "Failed to send Ether");
 
         // Note: https://docs.soliditylang.org/en/latest/control-structures.html#destructuring-assignments-and-returning-multiple-values
@@ -73,7 +73,7 @@ contract Attack {
     // Required to withdraw funds.
     function withdraw() external {
         require(msg.sender == owner, "Must be the owner");
-        (bool sent, ) = msg.sender.call{value: address(this).balance}("");
+        (bool sent,) = msg.sender.call{value: address(this).balance}("");
         require(sent, "Failed to send Ether");
     }
 }
@@ -81,7 +81,7 @@ contract Attack {
 // SAFER CONTRACT
 
 contract etherStoreSafe {
-    mapping(address => uint) public balances;
+    mapping(address => uint256) public balances;
 
     function deposit() external payable {
         balances[msg.sender] += msg.value;
@@ -90,14 +90,14 @@ contract etherStoreSafe {
     // Better pattern: Checks-Effects-Interactions
     function withdraw() external {
         // Checks
-        uint amount = balances[msg.sender];
+        uint256 amount = balances[msg.sender];
         require(amount > 0, "Insufficient balance");
 
         // Effects: Update the user's balance before sending Ether
         balances[msg.sender] = 0;
 
         // Interactions: Then send Ether
-        (bool success, ) = msg.sender.call{value: amount}("");
+        (bool success,) = msg.sender.call{value: amount}("");
         require(success, "Transfer failed");
     }
 }
